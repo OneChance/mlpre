@@ -1,7 +1,7 @@
 from math import *
 from decimal import Decimal, getcontext
 
-getcontext().prec = 30
+getcontext().prec = 13
 
 
 class Vector(object):
@@ -17,7 +17,7 @@ class Vector(object):
             raise TypeError('The coordinates must be an iterable')
 
     def __str__(self):
-        return 'Vector:{}'.format(self.coordinates)
+        return str(self.coordinates)
 
     def __eq__(self, v):
         return self.coordinates == v.coordinates
@@ -31,7 +31,7 @@ class Vector(object):
         return Vector(new_coordinates)
 
     def times_scalar(self, c):
-        new_coordinates = [Decimal(c) * x for x in self.coordinates]
+        new_coordinates = [Decimal(str(c)) * x for x in self.coordinates]
         return Vector(new_coordinates)
 
     def magnitude(self):
@@ -41,7 +41,7 @@ class Vector(object):
     def normalized(self):
         try:
             magnitude = self.magnitude()
-            return self.times_scalar(1.0 / magnitude)
+            return self.times_scalar(Decimal('1.0') / Decimal(str(magnitude)))
         except ZeroDivisionError:
             raise Exception('Cannot normalize the zero vector')
 
@@ -59,8 +59,20 @@ class Vector(object):
     def degree(self, v):
         return self.arc(v) * 180 / pi
 
+    def project(self, v):
+        try:
+            normv = v.normalized()
+            return normv.times_scalar(self.dot(normv))
+        except Exception as exception:
+            raise exception
 
-my_vector = Vector([-7.579, -7.88])
-my_vector2 = Vector([22.737, 23.64])
+    def orth(self, v):
+        try:
+            return self.minus(self.project(v))
+        except Exception as exception:
+            raise exception
 
-print my_vector.degree(my_vector2)
+my_vector = Vector(['3.009', '-6.172', '3.692', '-2.51'])
+my_vector2 = Vector(['6.404', '-9.144', '2.759', '8.718'])
+
+print my_vector.project(my_vector2)
