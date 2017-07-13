@@ -72,7 +72,17 @@ class Vector(object):
         except Exception as exception:
             raise exception
 
-my_vector = Vector(['3.009', '-6.172', '3.692', '-2.51'])
-my_vector2 = Vector(['6.404', '-9.144', '2.759', '8.718'])
+    def cross(self, v):
+        new_coordinates = []
+        for i in range(1, self.dimension + 1):
+            first = i % self.dimension
+            second = (i + 1) % self.dimension
+            new_coordinates.append(
+                self.coordinates[first] * v.coordinates[second] - self.coordinates[second] * v.coordinates[first])
+        return Vector(new_coordinates)
 
-print my_vector.project(my_vector2)
+    def parallelogram(self, v):
+        return self.cross(v).magnitude()
+
+    def triangle(self, v):
+        return self.parallelogram(v) / Decimal('2.0')
