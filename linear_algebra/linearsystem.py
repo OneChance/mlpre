@@ -98,6 +98,35 @@ class LinearSystem(object):
 
         return system
 
+    # 化简成行简化阶梯型.官方教程中从下到上消元的方法更好,只需要两个循环
+    def compute_rref(self):
+        tf = self.compute_triangular_form()
+        rows = len(tf.planes)
+        dim = tf.dimension
+
+        # 确定每行主元位置
+        indices = tf.indices_of_first_nonzero_terms_in_each_row()
+
+        for i in range(rows):
+            # 确认主元位置
+            m = indices[i]
+
+            # 主元位置系数不为1,缩放 (m<0说明没有主元)
+            if m >= 0 and tf[i].normal_vector.coordinates[m] != 1:
+                tf.multiply_coefficient_and_row(Decimal("1") / tf[i].normal_vector.coordinates[m], i)
+
+            for j in range(m + 1, dim):
+                # 要化简的位置不为0
+                if tf[i].normal_vector.coordinates[j] != 0:
+                    # 寻找主元位置在该列的行,与该行进行消元
+                    for k, v in enumerate(indices):
+                        if v == j:
+                            coefficient = tf[i].normal_vector.coordinates[j] / \
+                                          tf[k].normal_vector.coordinates[j]
+                            tf.add_multiple_times_row_to_row(-1 * coefficient, k, i)
+
+        return tf
+
     def __len__(self):
         return len(self.planes)
 
@@ -124,41 +153,25 @@ class MyDecimal(Decimal):
         return abs(self) < eps
 
 
-p1 = Plane(normal_vector=Vector(['1', '1', '1']), constant_term='1')
-p2 = Plane(normal_vector=Vector(['0', '1', '1']), constant_term='2')
+p1 = Plane(normal_vector=Vector(['0.786', '0.786', '0.588']), constant_term='-0.714')
+p2 = Plane(normal_vector=Vector(['-0.138', '-0.138', '0.244']), constant_term='0.319')
 s = LinearSystem([p1, p2])
-t = s.compute_triangular_form()
-if not (t[0] == p1 and
-                t[1] == p2):
-    print 'test case 1 failed'
-
-p1 = Plane(normal_vector=Vector(['1', '1', '1']), constant_term='1')
-p2 = Plane(normal_vector=Vector(['1', '1', '1']), constant_term='2')
-s = LinearSystem([p1, p2])
-t = s.compute_triangular_form()
-
-if not (t[0] == p1 and
-                t[1] == Plane(constant_term='1')):
-    print 'test case 2 failed'
-
-p1 = Plane(normal_vector=Vector(['1', '1', '1']), constant_term='1')
-p2 = Plane(normal_vector=Vector(['0', '1', '0']), constant_term='2')
-p3 = Plane(normal_vector=Vector(['1', '1', '-1']), constant_term='3')
-p4 = Plane(normal_vector=Vector(['1', '0', '-2']), constant_term='2')
-s = LinearSystem([p1, p2, p3, p4])
-t = s.compute_triangular_form()
-if not (t[0] == p1 and
-                t[1] == p2 and
-                t[2] == Plane(normal_vector=Vector(['0', '0', '-2']), constant_term='2') and
-                t[3] == Plane()):
-    print 'test case 3 failed'
-
-p1 = Plane(normal_vector=Vector(['0', '1', '1']), constant_term='1')
-p2 = Plane(normal_vector=Vector(['1', '-1', '1']), constant_term='2')
-p3 = Plane(normal_vector=Vector(['1', '2', '-5']), constant_term='3')
+ref = s.compute_rref()
+print ref
+print ref.indices_of_first_nonzero_terms_in_each_row()
+print set(range(ref.dimension)) - set(ref.indices_of_first_nonzero_terms_in_each_row())
+'''
+print "----------------------------------------------------"
+p1 = Plane(normal_vector=Vector(['8.631', '5.112', '-1.816']), constant_term='-5.113')
+p2 = Plane(normal_vector=Vector(['4.315', '11.132', '-5.27']), constant_term='-6.775')
+p3 = Plane(normal_vector=Vector(['-2.158', '3.01', '-1.727']), constant_term='-0.831')
 s = LinearSystem([p1, p2, p3])
-t = s.compute_triangular_form()
-if not (t[0] == Plane(normal_vector=Vector(['1', '-1', '1']), constant_term='2') and
-                t[1] == Plane(normal_vector=Vector(['0', '1', '1']), constant_term='1') and
-                t[2] == Plane(normal_vector=Vector(['0', '0', '-9']), constant_term='-2')):
-    print 'test case 4 failed'
+print s.compute_rref()
+print "----------------------------------------------------"
+p1 = Plane(normal_vector=Vector(['5.262', '2.739', '-9.878']), constant_term='-3.441')
+p2 = Plane(normal_vector=Vector(['5.111', '6.358', '7.638']), constant_term='-2.152')
+p3 = Plane(normal_vector=Vector(['2.016', '-9.924', '-1.367']), constant_term='-9.278')
+p4 = Plane(normal_vector=Vector(['2.167', '-13.543', '-18.883']), constant_term='-10.567')
+s = LinearSystem([p1, p2, p3, p4])
+print s.compute_rref()
+'''
