@@ -1,7 +1,5 @@
 # -*- coding:utf-8 -*-
-
 from decimal import Decimal, getcontext
-
 from vector import Vector
 from plane import Plane
 from copy import deepcopy
@@ -156,10 +154,8 @@ class MyDecimal(Decimal):
 p1 = Plane(normal_vector=Vector(['0.786', '0.786', '0.588']), constant_term='-0.714')
 p2 = Plane(normal_vector=Vector(['-0.138', '-0.138', '0.244']), constant_term='0.319')
 s = LinearSystem([p1, p2])
-ref = s.compute_rref()
-print ref
-print ref.indices_of_first_nonzero_terms_in_each_row()
-print set(range(ref.dimension)) - set(ref.indices_of_first_nonzero_terms_in_each_row())
+print (s.compute_rref())
+
 '''
 print "----------------------------------------------------"
 p1 = Plane(normal_vector=Vector(['8.631', '5.112', '-1.816']), constant_term='-5.113')
